@@ -1,0 +1,12 @@
+fastapi
+sqlalchemy
+pymupdf
+pytesseract
+pillow
+transformers
+langchain
+uvicorn
+langchain-community
+langchain-core
+langchain-huggingface
+python-multipart

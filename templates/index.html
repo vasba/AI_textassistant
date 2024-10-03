@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Document List</h1>
+    <ul>
+        {% for document in documents %}
+        <li>{{ document.title }} by {{ document.author }}</li>
+        {% endfor %}
+    </ul>
+    <h2>Ask a Question</h2>
+    <form action="/ask" method="post">
+        <label for="doc_id">Document ID:</label>
+        <input type="text" id="doc_id" name="doc_id">
+        <label for="question">Question:</label>
+        <input type="text" id="question" name="question">
+        <button type="submit">Ask</button>
+    </form>
+    {% if response %}
+    <h2>Response</h2>
+    <p>{{ response }}</p>
+    {% endif %}
+</body>
+</html>
