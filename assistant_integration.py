@@ -24,21 +24,26 @@ def generate_response(doc_id: int, question: str) -> str:
         return "Document not found."
     
     # Tokenize the document text and question
-    question_tokens = tokenizer.encode(question)
     document_tokens = tokenizer.encode(document_text)
-    
+    prompt = f"""
+        <|endoftext|><s>
+        User:
+        {question}
+        <s>
+        Bot:
+        """.strip()
+    prompt_tokens = tokenizer.encode(prompt)
     # Calculate the maximum input length for the document text
-    max_input_length = 2048 - len(question_tokens) - 10  # Adjust based on prompt structure
+    max_input_length = 2048 - len(prompt_tokens) - 10  # Adjust based on prompt structure
     
     # Split the document text into chunks
     chunks = [document_tokens[i:i + max_input_length] for i in range(0, len(document_tokens), max_input_length)]
     
     responses = []
     for chunk in chunks:
-        input_tokens = chunk + question_tokens
-        input_text = tokenizer.decode(input_tokens)
-        response = langchain_pipeline.invoke(input_text, max_new_tokens=50)
-        responses.append(response[0]['generated_text'])
+        input_text = tokenizer.decode(chunk) + prompt	
+        response = langchain_pipeline.invoke(input_text, max_new_tokens=300)
+        responses.append( response.split("Bot:")[-1].strip())
     
     # Combine the responses
     combined_response = " ".join(responses)
