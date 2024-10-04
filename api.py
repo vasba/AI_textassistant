@@ -1,4 +1,5 @@
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from assistant_integration import generate_response
 from db import Base, Document, SessionLocal, engine
@@ -9,7 +10,7 @@ from fastapi import FastAPI, Form, Request, UploadFile, File
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
+app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 def save_document(file: UploadFile, text: str, author: str, title: str):
@@ -30,12 +31,16 @@ def save_document(file: UploadFile, text: str, author: str, title: str):
     db.refresh(doc)
     return doc
 
+@app.get("/upload", response_class=HTMLResponse)
+async def upload_page(request: Request):
+    return templates.TemplateResponse("upload.html", {"request": request})
+
 @app.post("/upload_pdf/")
 async def upload_file(file: UploadFile = File(...),
                       author: str = Form(default="Unknown"),
                       title: str = Form(default="Unknown")):
     contents = await file.read()
-    text = extract_text_from_pdf(file.filename)
+    text = extract_text_from_pdf(contents)
     doc = save_document(file, text, author, title)
     return {"filename": doc.filename, "text": doc.text, "file_size": doc.file_size, "author": doc.author, "title": doc.title}
 

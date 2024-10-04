@@ -1,0 +1,29 @@
+.container {
+    display: flex;
+}
+.main-content {
+    flex: 1;
+}
+.document-list {
+    flex: 1;
+    margin-left: 20px;
+}
+
+.ask-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 10px;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.ask-form button {
+    align-self: flex-start;
+}

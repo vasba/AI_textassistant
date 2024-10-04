@@ -3,26 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Documents Assistant</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <h1>Document List</h1>
-    <ul>
-        {% for document in documents %}
-        <li>{{ document.title }} by {{ document.author }}</li>
-        {% endfor %}
-    </ul>
-    <h2>Ask a Question</h2>
-    <form action="/ask" method="post">
-        <label for="doc_id">Document ID:</label>
-        <input type="text" id="doc_id" name="doc_id">
-        <label for="question">Question:</label>
-        <input type="text" id="question" name="question">
-        <button type="submit">Ask</button>
-    </form>
-    {% if response %}
-    <h2>Response</h2>
-    <p>{{ response }}</p>
-    {% endif %}
+    <div class="container">
+        <div class="main-content">
+            <h2>Ask a Question</h2>
+            <form action="/ask" method="post" class="ask-form">
+                <div class="form-group">
+                    <label for="doc_name">Document Name:</label>
+                    <input type="text" id="doc_name" name="doc_name" readonly>
+                </div>
+                <input type="hidden" id="doc_id" name="doc_id">
+                <div class="form-group">
+                    <label for="question">Question:</label>
+                    <textarea id="question" name="question" rows="4" style="resize: both;"></textarea>
+                </div>
+                <button type="submit">Ask</button>
+            </form>
+            {% if response %}
+            <h2>Response</h2>
+            <p>{{ response }}</p>
+            {% endif %}
+        </div>
+        <div class="document-list">
+            <h1>Document List</h1> <button onclick="window.location.href='/upload'">Upload PDF</button>
+            <ul  id="document-list">
+                {% for document in documents %}
+                <li data-doc-id="{{ document.id }}" data-doc-name="{{ document.filename }}">{{ document.filename }}; {{ document.title }} by {{ document.author }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <script>
+        document.getElementById('document-list').addEventListener('click', function(event) {
+            if (event.target && event.target.nodeName === 'LI') {
+                var docId = event.target.getAttribute('data-doc-id');
+                var docName = event.target.getAttribute('data-doc-name');
+                document.getElementById('doc_id').value = docId;
+                document.getElementById('doc_name').value = docName;
+            }
+        });
+    </script>
 </body>
 </html>
