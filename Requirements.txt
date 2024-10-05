@@ -11,3 +11,4 @@ langchain-core
 langchain-huggingface
 python-multipart
 sentencepiece
+langchain-chroma

@@ -31,7 +31,7 @@
             <h1>Document List</h1> <button onclick="window.location.href='/upload'">Upload PDF</button>
             <ul  id="document-list">
                 {% for document in documents %}
-                <li data-doc-id="{{ document.id }}" data-doc-name="{{ document.filename }}">{{ document.filename }}; {{ document.title }} by {{ document.author }}</li>
+                <li data-doc-id="{{ document }}" data-doc-name="{{ document }}">{{ document }}</li>
                 {% endfor %}
             </ul>
         </div>

@@ -1,7 +1,9 @@
 from langchain_huggingface import HuggingFacePipeline
+from llama_index import VectorStoreIndex
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM, TextStreamer
 import torch
 from db import get_document_text
+
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 prompt = "Träd är fina för att"
 
@@ -18,20 +20,20 @@ model = pipeline('text-generation', tokenizer=tokenizer, model=model, device=dev
 # Initialize LangChain with the model
 langchain_pipeline = HuggingFacePipeline(pipeline=model)
 
-def generate_response(doc_id: int, question: str) -> str:
-    document_text = get_document_text(doc_id)
+def format_docs(docs):
+    return "\n\n".join(doc.node.text for doc in docs)
+
+def generate_response(doc_id: str, question: str, retriever) -> str:
+    retrieved_docs = retriever.retrieve(question)
+    document_text = format_docs(retrieved_docs)
+    #document_text = get_document_text(doc_id)
     if not document_text:
         return "Document not found."
     
     # Tokenize the document text and question
     document_tokens = tokenizer.encode(document_text)
-    prompt = f"""
-        <|endoftext|><s>
-        User:
-        {question}
-        <s>
-        Bot:
-        """.strip()
+    chunk = ''
+    prompt = getPrompt(question, chunk)
     prompt_tokens = tokenizer.encode(prompt)
     # Calculate the maximum input length for the document text
     max_input_length = 2048 - len(prompt_tokens) - 10  # Adjust based on prompt structure
@@ -41,7 +43,7 @@ def generate_response(doc_id: int, question: str) -> str:
     
     responses = []
     for chunk in chunks:
-        input_text = tokenizer.decode(chunk) + prompt	
+        input_text = getPrompt(question, tokenizer.decode(chunk))	
         response = langchain_pipeline.invoke(input_text, max_new_tokens=300)
         responses.append( response.split("Bot:")[-1].strip())
     
@@ -49,3 +51,13 @@ def generate_response(doc_id: int, question: str) -> str:
     combined_response = " ".join(responses)
     
     return combined_response
+
+def getPrompt(question, chunk):
+    return f"""
+        <|endoftext|><s>
+        User:
+        {chunk}
+        {question}
+        <s>
+        Bot:
+        """.strip()
